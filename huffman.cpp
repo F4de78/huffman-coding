@@ -90,7 +90,7 @@ myMap getFrequencyInFile (string filename){
     return m;
 }
 
-//convert map in to a Priority Queue 
+//convert map in a Priority Queue 
 myPriorityQueue createPQ (myMap m){
     myPriorityQueue pq;
     
