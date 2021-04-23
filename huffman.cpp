@@ -1,24 +1,7 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <map>
-#include <queue>
-#include <vector>
-#include <math.h>
+
+#include "huffman.h"
 
 using namespace std;
-
-//order is used for keep sorted the priority queue in correct order
-struct order {
-    constexpr bool operator()(pair<double,char> const& a,pair<double,char> const& b)
-        const noexcept{
-        return a.first < b.first;
-    }
-};
-
-typedef pair<char, double> mapPairs;
-typedef map< char,double > myMap;
-typedef priority_queue< pair<double,char> , vector<pair<double,char> >, order > myPriorityQueue;
 
 
 /********
@@ -53,7 +36,7 @@ void printMap(myMap m){
 void printPQ(myPriorityQueue gq){
     myPriorityQueue g = gq;
     while (!g.empty()) {
-        pair<double,char> top = g.top();
+        pair<double,char> top = g.top()->info;
         cout << "k:" << top.first << "\t";
         cout << "v:" << top.second << endl;
         g.pop();
@@ -72,8 +55,6 @@ myMap getFrequencyInFile (string filename){
 #endif
     //fill map with the occurency
     while (in.get(c) && in.is_open()) {
-        if(m.empty())
-            m.insert(mapPairs(c,1));
         if(m.count(c) > 0)
             m.at(c)++;
         else
@@ -90,13 +71,13 @@ myMap getFrequencyInFile (string filename){
     return m;
 }
 
-//convert map in a Priority Queue 
+//convert map in a Priority Queue of nodes
 myPriorityQueue createPQ (myMap m){
     myPriorityQueue pq;
     
     myMap::iterator itr;
     for (itr = m.begin(); itr != m.end(); ++itr) {
-        pq.push(make_pair(itr->second,itr->first));
+        pq.push(createNewNode(make_pair(itr->second,itr->first)));
     }
 #ifdef DEBUG
     printPQ(pq);
@@ -113,9 +94,35 @@ double ShannonEntropy (myMap m){
     return se;
 }
 
+void HuffmanCode(myPriorityQueue &pq){
+
+    uint pqsize = pq.size(); 
+    for(uint i = 0; i < pqsize-1; i++){
+        
+        Node x = pq.top();
+        cout << "x:"<< pq.top()->info.first ;
+        pq.pop();
+        Node y = pq.top();
+        cout << " ~~~~ y:"<< pq.top()->info.first ;
+        pq.pop();
+        Node z = sumNodesValues(x,y);
+        cout << " ~~~~ z:"<< z->info.first << endl;
+        leftInsert(z,x);
+        rightInsert(z,y);
+
+        pq.push(z);
+    }
+    
+}
+
 int main(int argc,char** argv){
     myMap m;
     m = getFrequencyInFile(argv[1]);
-    createPQ(m);
+    myPriorityQueue pq = createPQ(m);
     cout << "Shannon entropy of "<< argv[1] << ": " << ShannonEntropy(m) << endl;
+    cout << "size of pq: " << pq.size() << endl;
+    HuffmanCode(pq);
+    printPQ(pq);
+    cout << "size of pq: " << pq.size() << endl;
+    printPaths(pq.top());
 }
