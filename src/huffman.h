@@ -6,12 +6,10 @@
 #include <vector>
 #include <math.h>
 #include <string>
-
-
-
+#include <bitset>
+#include <string_view>
 
 //typedefs
-
 
 typedef std::pair<double, char> PQPairs;
 //tree
@@ -22,8 +20,9 @@ struct node{
 };
 
 typedef node* Node;
-typedef std::pair<char, double> mapPairs;
+typedef std::pair< char, double> mapPairs;
 typedef std::map< char,double > myMap;
+typedef std::map< char,std::string > encodingMap; //used for saving the final Huffman encoding
 
 //order is used for keep sorted the priority queue in correct order
 struct order {
@@ -39,7 +38,6 @@ void leftInsert(node* &, node* );
 void rightInsert(node* &, node* );
 node* sumNodesValues(node* &, node* &);
 void printInorder(Node );
-
-void printPathsRecur(node* , int , int ); 
-void printArray(int , int ); 
-void printPaths(node*); 
+encodingMap printCodes(Node , char* , int , std::string&);
+void printArr(char* , int);
+int height(Node);

@@ -24,10 +24,22 @@ unsigned int wc(ifstream &in){
 void printMap(myMap m){
     myMap::iterator itrP;
     for (itrP = m.begin(); itrP != m.end(); ++itrP) {
-            std::cout << itrP->first
+            cout << itrP->first
               << ':'
               << itrP->second
-              << std::endl;
+              << endl;
+    }
+    cout << endl;
+}
+
+//for debug: print the map
+void printEncMap(encodingMap em){
+    encodingMap::iterator itrE;
+    for (itrE = em.begin(); itrE != em.end(); ++itrE) {
+            cout << itrE->first
+              << ':'
+              << itrE->second
+              << endl;
     }
     cout << endl;
 }
@@ -66,7 +78,7 @@ myMap getFrequencyInFile (string filename){
         itr->second = itr->second/chars;
     }
 #ifdef DEBUG
-    printMap(m);
+    printMap(m);yMap
 #endif
     return m;
 }
@@ -100,13 +112,19 @@ void HuffmanCode(myPriorityQueue &pq){
     for(uint i = 0; i < pqsize-1; i++){
         
         Node x = pq.top();
+#ifdef DEBUG
         cout << "x:"<< pq.top()->info.first ;
+#endif
         pq.pop();
         Node y = pq.top();
+#ifdef DEBUG
         cout << " ~~~~ y:"<< pq.top()->info.first ;
+#endif
         pq.pop();
         Node z = sumNodesValues(x,y);
+#ifdef DEBUG
         cout << " ~~~~ z:"<< z->info.first << endl;
+#endif
         leftInsert(z,x);
         rightInsert(z,y);
 
@@ -122,7 +140,16 @@ int main(int argc,char** argv){
     cout << "Shannon entropy of "<< argv[1] << ": " << ShannonEntropy(m) << endl;
     cout << "size of pq: " << pq.size() << endl;
     HuffmanCode(pq);
+#ifdef DEBUG
     printPQ(pq);
-    cout << "size of pq: " << pq.size() << endl;
-    printPaths(pq.top());
+#endif
+    char arr[height(pq.top())];
+    string code ="";
+    encodingMap enc;
+    enc = printCodes(pq.top(),arr,0,code);
+#ifdef DEBUG
+    printEncMap(enc);
+#endif
+    cout<< "Huffman code: \n"<< code << endl;
+
 }
