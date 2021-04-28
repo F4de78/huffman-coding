@@ -78,7 +78,7 @@ myMap getFrequencyInFile (string filename){
         itr->second = itr->second/chars;
     }
 #ifdef DEBUG
-    printMap(m);yMap
+    printMap(m);
 #endif
     return m;
 }
@@ -133,6 +133,51 @@ void HuffmanCode(myPriorityQueue &pq){
     
 }
 
+void addPadding(string &bitString){
+    while(bitString.length()%8 != 0)
+        bitString.push_back(NULL);
+}
+
+void writeBits(string bitString,int bitLen,string filename){
+    bitset<8> byte;
+    char* toWrite;
+    int bitcount = 0;
+    ofstream compr(filename);
+    if(compr){
+        while(bitcount < bitLen){
+            for (int i = 0;i<8;i++ ){
+                if(bitString.at(bitcount) == '1'){
+                    byte[i] = 1;
+                    bitcount++;
+                }else if(bitString.at(bitcount) == '0'){
+                    byte[i] = 0;
+                    bitcount++;
+                }
+            }
+            toWrite[0] = (char) byte.to_ulong();
+            compr.write(toWrite,1);
+            byte.reset();
+
+        }
+    }
+}
+
+/*
+void writeDecodeInfo(int bitLen, encodingMap em, string filename){
+    ofstream info(filename);
+    if(info){
+        info.write(itoa(bitLen));
+        info.write("\n\n",2);
+        encodingMap::iterator itrE;
+        for (itrE = em.begin(); itrE != em.end(); ++itrE) {
+            char* toWrite = itrE->first + ":" + itrE->second + "|";
+            info.write(toWrite,toWrite.length());  
+        }
+        
+    }
+}
+*/
+
 int main(int argc,char** argv){
     myMap m;
     m = getFrequencyInFile(argv[1]);
@@ -151,5 +196,12 @@ int main(int argc,char** argv){
     printEncMap(enc);
 #endif
     cout<< "Huffman code: \n"<< code << endl;
-
+    int noPaddingLen = code.length();
+    addPadding(code);
+    cout << "w/ padding: \n" << code << endl;
+    string arg1(argv[1]);
+    string outFile = arg1 + ".huff";
+    cout << "saving compressed file to " << outFile << endl;
+    writeBits(code,code.length(),outFile);
+    //writeDecodeInfo(noPaddingLen,enc,"info");
 }
