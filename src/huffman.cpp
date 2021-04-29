@@ -135,13 +135,14 @@ void HuffmanCode(myPriorityQueue &pq){
 
 void addPadding(string &bitString){
     while(bitString.length()%8 != 0)
-        bitString.push_back(NULL);
+        bitString.push_back('0');
 }
 
 void writeBits(string bitString,int bitLen,string filename){
     bitset<8> byte;
     char* toWrite;
     int bitcount = 0;
+    
     ofstream compr(filename);
     if(compr){
         while(bitcount < bitLen){
