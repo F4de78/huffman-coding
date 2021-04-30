@@ -38,6 +38,6 @@ void leftInsert(node* &, node* );
 void rightInsert(node* &, node* );
 node* sumNodesValues(node* &, node* &);
 void printInorder(Node );
-encodingMap printCodes(Node , char* , int , std::string&);
+encodingMap extractCode(Node , char* , int );
 void printArr(char* , int);
 int height(Node);

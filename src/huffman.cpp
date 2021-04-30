@@ -163,6 +163,26 @@ void writeBits(string bitString,int bitLen,string filename){
     }
 }
 
+double getAL(encodingMap enc , myMap freq){
+    myMap::iterator itrF;
+    encodingMap::iterator itrE;
+    double al;
+    for (itrF = freq.begin(),itrE = enc.begin(); /*itrF != freq.end(),*/itrE != enc.end(); ++itrF,++itrE) {
+        al += itrF->second * itrE->second.length();
+    }
+    return al;    
+}
+
+string compress(encodingMap enc, string filename){
+    string compress = "";
+    ifstream in(filename);
+    char c;
+    while (in.get(c) && in.is_open()) {
+        compress += enc.at(c);
+    }
+    return compress;
+}
+
 /*
 void writeDecodeInfo(int bitLen, encodingMap em, string filename){
     ofstream info(filename);
@@ -181,28 +201,39 @@ void writeDecodeInfo(int bitLen, encodingMap em, string filename){
 
 int main(int argc,char** argv){
     myMap m;
+    double entropy;
+    double lenght;
+
     m = getFrequencyInFile(argv[1]);
+
     myPriorityQueue pq = createPQ(m);
-    cout << "Shannon entropy of "<< argv[1] << ": " << ShannonEntropy(m) << endl;
+
+#ifdef DEBUG
     cout << "size of pq: " << pq.size() << endl;
+#endif
     HuffmanCode(pq);
 #ifdef DEBUG
     printPQ(pq);
 #endif
     char arr[height(pq.top())];
-    string code ="";
     encodingMap enc;
-    enc = printCodes(pq.top(),arr,0,code);
-#ifdef DEBUG
+    enc = extractCode(pq.top(),arr,0);
+    cout<< "Huffman code: \n"<< endl;
     printEncMap(enc);
-#endif
-    cout<< "Huffman code: \n"<< code << endl;
-    int noPaddingLen = code.length();
-    addPadding(code);
-    cout << "w/ padding: \n" << code << endl;
+
+    entropy = ShannonEntropy(m);
+    cout << "Shannon entropy of "<< argv[1] << ": \t" << entropy << endl;
+
+    lenght = getAL(enc,m);
+    cout<< "Lenght of Huffman coding: \t\t"<< lenght << endl;
+
+    
+    string toCompres = compress(enc,argv[1]);
+    addPadding(toCompres);
     string arg1(argv[1]);
     string outFile = arg1 + ".huff";
     cout << "saving compressed file to " << outFile << endl;
-    writeBits(code,code.length(),outFile);
-    //writeDecodeInfo(noPaddingLen,enc,"info");
+    writeBits(toCompres,toCompres.length(),outFile);
+
+    return 0;
 }

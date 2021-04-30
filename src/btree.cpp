@@ -33,8 +33,7 @@ bool isLeaf(Node l){
 
 int height(Node root){
   int h = 0;
-  if(root != NULL)
-  {
+  if(root != NULL){
     int lHeight = height(root->left);
     int rHeight = height(root->right);
     int maxHeight = max(lHeight,rHeight);
@@ -43,19 +42,19 @@ int height(Node root){
   return h;
 }
 
-encodingMap printCodes(Node root, char* arr, int i, string &ret){
+encodingMap extractCode(Node root, char* arr, int i){
     static encodingMap encoding;//saves the encoding table
     if (root->left) {
         arr[i] = '0';//if left append a 0
-        printCodes(root->left, arr, i + 1,ret);
+        extractCode(root->left, arr, i + 1);
     }
     if (root->right) {
         arr[i] = '1';//if left append a 1
-        printCodes(root->right, arr, i + 1,ret);
+        extractCode(root->right, arr, i + 1);
     }
     if (isLeaf(root)) {
         string aux(arr,i);//char array to string
-        ret += aux;//append the char array to the 'stream' string
+        //ret += aux;//append the char array to the 'stream' string
         encoding.insert(make_pair(root->info.second,aux)); //add row to map    
     }
     return encoding;
