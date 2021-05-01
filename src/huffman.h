@@ -28,7 +28,7 @@ typedef std::map< char,std::string > encodingMap; //used for saving the final Hu
 struct order {
     constexpr bool operator()(Node const& a,Node const& b)
         const noexcept{
-        return a->info.first > b->info.first;
+        return a->info.first >= b->info.first;
     }
 };
 typedef std::priority_queue< Node , std::vector<Node >, order > myPriorityQueue;
