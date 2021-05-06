@@ -97,6 +97,7 @@ myPriorityQueue createPQ (myMap m){
     return pq;
 }
 
+//calculate the shannon entropy
 double ShannonEntropy (myMap m){
     myMap::iterator itrP;
     double se;
@@ -106,6 +107,7 @@ double ShannonEntropy (myMap m){
     return se;
 }
 
+//build the huffman coding tree
 void HuffmanCode(myPriorityQueue &pq){
 
     uint pqsize = pq.size(); 
@@ -133,20 +135,21 @@ void HuffmanCode(myPriorityQueue &pq){
     
 }
 
+//used to add padding '0' at the end of the binary compressed file
 void addPadding(string &bitString){
     while(bitString.length()%8 != 0)
         bitString.push_back('0');
 }
 
+//write the compressed file in to a file
 void writeBits(string bitString,int bitLen,string filename){
     bitset<8> byte;
-    char* toWrite;
     int bitcount = 0;
     
     ofstream compr(filename);
     if(compr){
         while(bitcount < bitLen){
-            for (int i = 0;i<8;i++ ){
+            for (int i = 0;i<8;i++ ){//fill a byte with 1 or 0(8 bit in a byteset)
                 if(bitString.at(bitcount) == '1'){
                     byte[i] = 1;
                     bitcount++;
@@ -155,14 +158,16 @@ void writeBits(string bitString,int bitLen,string filename){
                     bitcount++;
                 }
             }
-            toWrite[0] = (char) byte.to_ulong();
-            compr.write(toWrite,1);
+            compr << (char) byte.to_ulong();//cast the bitset to a char and write it to file
+
             byte.reset();
 
         }
     }
+    compr.close();
 }
 
+//calculate the lenght
 double getAL(encodingMap enc , myMap freq){
     myMap::iterator itrF;
     encodingMap::iterator itrE;
@@ -173,36 +178,46 @@ double getAL(encodingMap enc , myMap freq){
     return al;    
 }
 
-string compress(encodingMap enc, string filename){
+//encode the given file in to a string using the huffman encoding
+string compress(encodingMap enc, string filename , int &bitLen){
     string compress = "";
     ifstream in(filename);
     char c;
     while (in.get(c) && in.is_open()) {
         compress += enc.at(c);
+        bitLen++;
     }
     return compress;
 }
 
-/*
-void writeDecodeInfo(int bitLen, encodingMap em, string filename){
+//write the huffman coding to a file pluse some other infos
+void writeDecodeInfo(int bitLen, encodingMap em, string filename, myMap m){
     ofstream info(filename);
     if(info){
-        info.write(itoa(bitLen));
-        info.write("\n\n",2);
+        info << to_string(bitLen);
+        info << "\n";
         encodingMap::iterator itrE;
         for (itrE = em.begin(); itrE != em.end(); ++itrE) {
-            char* toWrite = itrE->first + ":" + itrE->second + "|";
-            info.write(toWrite,toWrite.length());  
+            info << (char)(itrE->first) << ":" << itrE->second << "|";
         }
-        
+        info << "\n";
+        info << "entropy: " << ShannonEntropy(m) << "\n";
+        info << "lenght: " << getAL(em,m) << "\n";
     }
+    info.close();
 }
-*/
+
 
 int main(int argc,char** argv){
     myMap m;
     double entropy;
     double lenght;
+    int bitLen = 0; 
+
+    if(argc < 2){
+        cout<< "Usage:\n"<< argv[0] << " <file_to_compress>" << endl;
+        return 1;
+    }
 
     m = getFrequencyInFile(argv[1]);
 
@@ -228,12 +243,25 @@ int main(int argc,char** argv){
     cout<< "Lenght of Huffman coding: \t\t"<< lenght << endl;
 
     
-    string toCompres = compress(enc,argv[1]);
+    string toCompres = compress(enc,argv[1],bitLen);
     addPadding(toCompres);
     string arg1(argv[1]);
-    string outFile = arg1 + ".huff";
-    cout << "saving compressed file to " << outFile << endl;
-    writeBits(toCompres,toCompres.length(),outFile);
+    char chose;
+    cout << "save compressed file? [y/n] ";
+    cin >> chose;
+    if(chose == 'y' || chose == 'Y'){
+        string outFile = arg1 + ".huff";
+        cout << "saving compressed file to " << outFile << endl;
+        writeBits(toCompres,toCompres.length(),outFile);
+    }
+
+    cout << "save info file? [y/n] ";
+    cin >> chose;
+    if(chose == 'y' || chose == 'Y'){
+        string outFileInfo = arg1 + ".info";
+        cout << "saving infos about compressed file to " << outFileInfo  << endl;
+        writeDecodeInfo(bitLen,enc,outFileInfo,m);
+    }
 
     return 0;
 }
