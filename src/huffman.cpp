@@ -57,13 +57,13 @@ void printPQ(myPriorityQueue gq){
 }
 
 //count the chars occurency of a file, saves in a file and calculate the frequency of each char
-myMap getFrequencyInFile (string filename){
+myMap getFrequencyInFile (string filename, uint &charInFile){
     ifstream in (filename);
     char c;
     myMap m;
-    unsigned int chars = wc(in);
+    charInFile = wc(in);
 #ifdef DEBUG
-    cout << chars << endl;
+    cout << charInFile << endl;
 #endif
     //fill map with the occurency
     while (in.get(c) && in.is_open()) {
@@ -75,7 +75,7 @@ myMap getFrequencyInFile (string filename){
     //calculate the frequency of each character
     myMap::iterator itr;
     for (itr = m.begin(); itr != m.end(); ++itr) {
-        itr->second = itr->second/chars;
+        itr->second = itr->second/charInFile;
     }
 #ifdef DEBUG
     printMap(m);
@@ -149,7 +149,7 @@ void writeBits(string bitString,int bitLen,string filename){
     ofstream compr(filename);
     if(compr){
         while(bitcount < bitLen){
-            for (int i = 0;i<8;i++ ){//fill a byte with 1 or 0(8 bit in a byteset)
+            for (int i = 0;i<8;++i ){//fill a byte with 1 or 0(8 bit in a byteset)
                 if(bitString.at(bitcount) == '1'){
                     byte[i] = 1;
                     bitcount++;
@@ -172,26 +172,28 @@ double getAL(encodingMap enc , myMap freq){
     myMap::iterator itrF;
     encodingMap::iterator itrE;
     double al;
-    for (itrF = freq.begin(),itrE = enc.begin(); /*itrF != freq.end(),*/itrE != enc.end(); ++itrF,++itrE) {
+    for (itrF = freq.begin(),itrE = enc.begin(); itrE != enc.end(); ++itrF,++itrE) {
         al += itrF->second * itrE->second.length();
     }
     return al;    
 }
 
 //encode the given file in to a string using the huffman encoding
-string compress(encodingMap enc, string filename , int &bitLen){
+string compress(encodingMap enc, string filename , uint &bitLen){
     string compress = "";
     ifstream in(filename);
     char c;
     while (in.get(c) && in.is_open()) {
-        compress += enc.at(c);
-        bitLen++;
+        
+        compress += enc.at(c); //count the bits in the string
+        bitLen += enc.at(c).length();
+
     }
     return compress;
 }
 
 //write the huffman coding to a file pluse some other infos
-void writeDecodeInfo(int bitLen, encodingMap em, string filename, myMap m){
+void writeDecodeInfo(int bitLen, encodingMap em, string filename, myMap m,int charInFile,string toCompres){
     ofstream info(filename);
     if(info){
         info << to_string(bitLen);
@@ -203,6 +205,8 @@ void writeDecodeInfo(int bitLen, encodingMap em, string filename, myMap m){
         info << "\n";
         info << "entropy: " << ShannonEntropy(m) << "\n";
         info << "lenght: " << getAL(em,m) << "\n";
+        info<< "Number of char before: "<< charInFile << "(" << charInFile * 8 << " bit)" << endl;
+        info<< "Number of char after: "<< toCompres.length() / 8 << "(" << bitLen << " bit ,with padding "<< toCompres.length() <<")" << endl;
     }
     info.close();
 }
@@ -212,14 +216,14 @@ int main(int argc,char** argv){
     myMap m;
     double entropy;
     double lenght;
-    int bitLen = 0; 
-
+    uint bitLen = 0; 
+    uint charInFile = 0;
     if(argc < 2){
         cout<< "Usage:\n"<< argv[0] << " <file_to_compress>" << endl;
         return 1;
     }
 
-    m = getFrequencyInFile(argv[1]);
+    m = getFrequencyInFile(argv[1],charInFile);
 
     myPriorityQueue pq = createPQ(m);
 
@@ -233,16 +237,9 @@ int main(int argc,char** argv){
     char arr[height(pq.top())];
     encodingMap enc;
     enc = extractCode(pq.top(),arr,0);
-    cout<< "Huffman code: \n"<< endl;
+    cout<< "Huffman code: "<< endl;
     printEncMap(enc);
 
-    entropy = ShannonEntropy(m);
-    cout << "Shannon entropy of "<< argv[1] << ": \t" << entropy << endl;
-
-    lenght = getAL(enc,m);
-    cout<< "Lenght of Huffman coding: \t\t"<< lenght << endl;
-
-    
     string toCompres = compress(enc,argv[1],bitLen);
     addPadding(toCompres);
     string arg1(argv[1]);
@@ -254,13 +251,23 @@ int main(int argc,char** argv){
         cout << "saving compressed file to " << outFile << endl;
         writeBits(toCompres,toCompres.length(),outFile);
     }
+    //prints compression infos
+    entropy = ShannonEntropy(m);
+    cout << "Shannon entropy of "<< argv[1] << ": \t" << entropy << endl;
 
-    cout << "save info file? [y/n] ";
+    lenght = getAL(enc,m);
+    cout<< "Lenght of Huffman coding: \t\t"<< lenght << endl;
+
+    cout<< "Number of char before: \t\t\t"<< charInFile << "(" << charInFile * 8 << " bit)" << endl;
+
+    cout<< "Number of char after: \t\t\t"<< toCompres.length() / 8 << "(" << bitLen << " bit ,with padding "<< toCompres.length() <<")" << endl;
+
+    cout << "save info to file? [y/n] ";
     cin >> chose;
     if(chose == 'y' || chose == 'Y'){
         string outFileInfo = arg1 + ".info";
         cout << "saving infos about compressed file to " << outFileInfo  << endl;
-        writeDecodeInfo(bitLen,enc,outFileInfo,m);
+        writeDecodeInfo(bitLen,enc,outFileInfo,m,charInFile,toCompres);
     }
 
     return 0;

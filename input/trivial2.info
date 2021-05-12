@@ -1,0 +1,7 @@
+24
+
+:1101|A:1100|B:111|C:10|D:0|
+entropy: 2.11808
+lenght: 2.18182
+Number of char before: 11(88 bit)
+Number of char after: 3(24 bit ,with padding 24)

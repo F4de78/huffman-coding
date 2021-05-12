@@ -1,0 +1,84 @@
+\documentclass{article}
+
+\usepackage{graphicx} % Required for the inclusion of images
+\usepackage{natbib} % Required to change bibliography style to APA
+\usepackage{amsmath} % Required for some math elements 
+\usepackage{geometry}
+\usepackage[italian]{babel}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{subfig}
+\usepackage{amsmath}
+\usepackage {tikz}
+\usetikzlibrary {positioning}
+\usepackage{graphicx}
+\usepackage{subfig}
+
+%\usepackage {xcolor}
+\definecolor {processblue}{cmyk}{0.96,0,0,0}
+
+
+ \geometry{
+ a4paper,
+ total={170mm,257mm},
+ left=22mm,
+ top=22mm,
+ }
+
+
+
+\renewcommand{\labelenumi}{\alph{enumi}.} % Make numbering in the enumerate environment by letter rather than number (e.g. section 6)
+
+%\usepackage{times} % Uncomment to use the Times New Roman font
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+\title{Codifica di Huffman \\ TDII} % Title
+\author{
+Marco Zucca \textless s4828628@studenti.unige.it\textgreater\\
+}
+\date{\today} % Date for the report
+
+
+
+\begin{document}
+
+\maketitle % Insert the title, author and date
+\section{Informazioni preliminari}
+
+Il codice fornito \'e stato compilato con: \begin{verbatim}
+g++ src/btree.cpp src/huffman.cpp -o huffman
+\end{verbatim} 
+su macchina Linux x86\_64 e gcc ver. 10.3.1 20210422 . \\
+si puo' compilare con il parametro -D DEBUG per far stampare gli stati 
+intermedi del processo di codifica
+
+\section{Funzionamento}
+\subsection{File di output .info}
+Nel file .info viene inserito il numero di bit utilizzati per comprimere il
+file,la codifica utilizzata per comprimere il file nel formato:
+carattere:codifica$|$carattere:codifica$|$...
+l'entropia, la lumnghezza attesa e le lunghezze (in byte e in bit) del file dato in input e il relativo file compresso
+
+\subsection{File di output .huff}
+Nel file con estensione .huff viene salvato il file di input compresso con la codifica di huffman basata sulla frequenze dei caratteri del file in input.\\
+Questo approccio richiede che insieme al file binario contenente il file compresso, sia anche fornito al decodificatore, la codifica utilizzata per la compressione (vedi .info).
+Salvare la compressione ottenuta su un file porta a delle complicazioni, perch\'e non si puo' scrivere bit per bit la codifica sul file, in quanto la minima unit\'a scrivibile su un file \'e un byte.
+Per ovviare a cio' infondo al file vengono aggiunti dei bit di "padding" per poter raggiungere un byte (se necessario) e viene comunicato insieme al file contenente la codifica utilizzata, il numero di bit effettivi utilizzati per la codifica.
+\section{Osservazioni}
+\subsection{Entropia e lunghezza attesa}
+Utlizzando come file di input testi con numero caratteri maggiori di $10^{5}$ (vedi \verb+input/dante.txt+) si nota che la lunghezza attesa calcolata sulla compressione \'e sempre maggiore rispetto all'entropia calcolata sul testo di input, anche se se di poco. \\
+Questo accade perch\'e l'entropia rappresenta il limite inferiore della lunghezza attesa di una codifica univocamente decifrabile (come quella di Huffman). Questa propriet\'a \'e data dal teorema che afferma, appunto, che la lunghezza attesa di una codifica univocamente decifrabile, non puo' essere minore dell'entropia.
+\newpage
+\subsection{Compressione}
+\subsubsection{Rapporto tra input e output}
+Prendendo sempre come esempio \verb+input/dante.txt+, \'e possibile vedere una netta riduzione dei bit utilizzati per rappresentare il file di input:
+\begin{verbatim}
+            Number of char before:  557042(4456336 bit)
+            Number of char after:   322059(2576469 bit ,with padding 2576472)
+\end{verbatim}
+Possiamo valutare quanti bit in meno sono stati calcolando: \\
+\[ G = \frac{after \  bits}{before \  bits} \\ = \frac{2576469}{4456336} \approx 0.5781 \approx 57\% \]
+\end{document}

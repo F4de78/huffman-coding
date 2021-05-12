@@ -10,11 +10,11 @@ Node createNewNode(PQPairs x){
 
     return nn;
 }
-
+//insert left child
 void leftInsert(Node &root, Node x){
     root->left = x;
 }
-
+//insert right child
 void rightInsert(Node &root, Node x){
     root->right = x;
 }
@@ -42,6 +42,7 @@ int height(Node root){
   return h;
 }
 
+//visit the tree and extract the code for each character
 encodingMap extractCode(Node root, char* arr, int i){
     static encodingMap encoding;//saves the encoding table
     if (root->left) {
@@ -54,7 +55,6 @@ encodingMap extractCode(Node root, char* arr, int i){
     }
     if (isLeaf(root)) {
         string aux(arr,i);//char array to string
-        //ret += aux;//append the char array to the 'stream' string
         encoding.insert(make_pair(root->info.second,aux)); //add row to map    
     }
     return encoding;
