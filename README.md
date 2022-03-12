@@ -35,4 +35,4 @@ Per ovviare a cio' infondo al file vengono aggiunti dei bit di "padding" per pot
 - Fare la parte di decodifica
 
 ## Licenza
-[MIT](/../main/LICENSE)
+Codice rilasciato sotto licenza [MIT](LICENSE)
