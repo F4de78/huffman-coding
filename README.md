@@ -1,4 +1,4 @@
-# Huffman encoding
+# Huffman coding
 
 Progetto realizzato per il corso di Teoria dell'informazione ed inferenza
 
